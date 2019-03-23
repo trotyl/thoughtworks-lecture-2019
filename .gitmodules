@@ -193,3 +193,15 @@
 [submodule "repos/4498_ItGirls/ThoughtWorksPracticse"]
 	path = repos/4498_ItGirls/ThoughtWorksPracticse
 	url = https://github.com/ItGirls/ThoughtWorksPracticse
+[submodule "/Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4389_konglanxin/2-1-html"]
+	path = /Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4389_konglanxin/2-1-html
+	url = https://github.com/konglanxin/2-1-html
+[submodule "/Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4402_NickMengChen/Homework2"]
+	path = /Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4402_NickMengChen/Homework2
+	url = https://github.com/NickMengChen/Homework2
+[submodule "/Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4404_xiaoyiyue77/homework2"]
+	path = /Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4404_xiaoyiyue77/homework2
+	url = https://github.com/xiaoyiyue77/homework2
+[submodule "/Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4454_jingliang0414/TWS-PRACTICE-Week2"]
+	path = /Users/zjyu/Projects/github/trotyl/thoughtworks-lecture-2019/repos/4454_jingliang0414/TWS-PRACTICE-Week2
+	url = https://github.com/jingliang0414/TWS-PRACTICE-Week2

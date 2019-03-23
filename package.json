@@ -7,10 +7,13 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "load": "ts-node load.ts"
+    "load-repos": "ts-node scripts/load-repos.ts",
+    "load-answers": "ts-node scripts/load-answers.ts"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.1.7",
     "@types/shelljs": "^0.8.3",
+    "node-fetch": "^2.3.0",
     "shelljs": "^0.8.3",
     "ts-node": "^8.0.3",
     "typescript": "^3.3.4000"
