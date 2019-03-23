@@ -2,20 +2,14 @@ import fs from 'fs'
 import path from 'path'
 import fetch from 'node-fetch'
 
+const BASE_URL = `https://school.thoughtworks.cn/learn/program-center/api`
+
 const headers = {
   sessionid: process.env.TWS_SESSIONID as string,
   token: process.env.TWS_TOKEN as string,
 }
 
-const quizzes: [string, number, number][] = [
-  ['01-markdown', 1679, 357],
-  ['02-html', 1678, 366],
-  ['02-css', 1687, 374],
-  ['02-html-css', 1686, 373],
-  ['03-tdd', 1758, 5],
-  ['04-tasking', 1753, 3],
-  ['04-pos', 1754, 4],
-]
+const programs = [118, 144]
 
 const REPO_BLACKLIST = [
   'https://github.com/BlueSkylover/html_homework',
@@ -29,48 +23,135 @@ const REPO_BLACKLIST = [
   'https://github.com/yuzhongyangwang/taxi',
 ]
 
+interface Student {
+  mobilePhone: string
+  name: string
+  groups: never[]
+  id: number
+  email: string
+  username: string
+}
+
+interface Quiz {
+  id: number
+  quizId: number
+  assignmentId: number
+  createTime: never
+  creatorId: number
+  orderNumber: number
+}
+
+interface Assignment {
+  id: number
+  taskId: number
+  type: 'SUBJECTIVE_QUIZ'
+  title: string
+  createTime: string
+  creatorId: number
+  orderNumber: number
+  visible: boolean
+  selectedQuizzes: Quiz[]
+  title_zh_TW: string
+}
+
+interface Task {
+  id: number
+  programId: number
+  paperId: number
+  topicId: number
+  orderNumber: number
+  title: string
+  content: string
+  deadLine: string
+  createTime: never
+  visible: boolean
+  type: string
+  assignments: Assignment[]
+}
+
+interface AssignmentWrapper {
+  task: Task
+  assignment: Assignment
+  topic: never
+  situation: never
+}
+
+interface Answer {
+  id: number
+  description: string
+  type?: string
+  answer?: string
+  choices?: { choice: string }[]
+  isCorrect?: boolean
+  userAnswer: string
+  userAnswerZipUrl: string | null
+  answerBranch?: string | null
+}
+
 async function main() {
-  const response = await fetch(`https://school.thoughtworks.cn/learn/program-center/api/myStudents/programs/118`, { headers })
-  const students = await response.json() as any[]
-  const ids = students.map(x => x.student.id)
-  for (const [title, assignment, quiz] of quizzes) {
-    const base = path.resolve(__dirname, `../answers/pre/${title}`)
-    fs.mkdirSync(base, { recursive: true })
-    for (const id of ids) {
-      try {
-        console.log(`Fetching answer of user ${id}`)
-        const response = await fetch(
-          `https://school.thoughtworks.cn/learn/program-center/api/v2/students/${id}/assignments/${assignment}/quizzes/${quiz}`,
-          { headers },
-        )
-        const { userAnswer: answer } = await response.json()
-        if (answer && answer.length > 0) {
-          fs.writeFileSync(
-            path.resolve(base, `${id}.md`), answer, { encoding: 'utf-8' }
-          )
+  const availableRepos: [number, string][] = []
+  
+  for (const programId of programs) {
+    const [students, assignmentWrappers]: [Student[], AssignmentWrapper[]] = await Promise.all([
+      fetch(`${BASE_URL}/programs/${programId}/students`, { headers }).then(res => res.json()),
+      fetch(`${BASE_URL}/v2/myStudents/programs/${programId}/students/assignments`, { headers }).then(res => res.json()),
+    ])
+
+    const assignments = assignmentWrappers.map(x => x.assignment)
+
+    for (const student of students) {
+      for (const assignment of assignments) {
+        const answers: string[] = []
+        for (const quiz of assignment.selectedQuizzes) {
+          const answer: Answer = await fetch(`${BASE_URL}/v2/students/${student.id}/assignments/${assignment.id}/quizzes/${quiz.quizId}`, { headers }).then(res => res.json())
           let res: RegExpExecArray | null = null
-          if (res = /https:\/\/github.com\/.*?\/[\w\-]+/.exec(answer)) {
-            const [url] = res
-            const reposJsonPath = path.resolve(__dirname, `./repos.json`)
-            const reposJson = fs.readFileSync(reposJsonPath, { encoding: 'utf-8' })
-            const repos = JSON.parse(reposJson)
-            if (!repos[id]) {
-              repos[id] = [] as string[]
+          if (answer.choices) {
+            answers.push(`${answer.description}
+回答：${answer.userAnswer ? answer.choices[parseInt(answer.userAnswer!, 10)].choice : '尚未回答'}
+正确答案：${answer.choices[parseInt(answer.answer!, 10)].choice}
+`)
+          } else if (answer.answerBranch != null && (res = /https:\/\/github.com\/.*?\/[\w\-]+/.exec(answer.userAnswer))) {
+            const [repoUrl] = res
+            availableRepos.push([student.id, repoUrl])
+          } else if (answer.userAnswerZipUrl) {
+            answers.push(`Zip: ${answer.userAnswerZipUrl}`)
+          } else if (answer.userAnswer) {
+            answers.push(answer.userAnswer)
+
+            let res: RegExpExecArray | null = null
+            if (res = /https:\/\/github.com\/.*?\/[\w\-]+/.exec(answer.userAnswer)) {
+              const [repoUrl] = res
+              availableRepos.push([student.id, repoUrl])
             }
-            const urls: string[] = repos[id]
-            if (urls.includes(url) || REPO_BLACKLIST.includes(url)) { continue }
-            urls.push(url)
-            const updatedReposJson = JSON.stringify(repos, undefined, 2)
-            fs.writeFileSync(reposJsonPath, updatedReposJson, { encoding: 'utf-8' })
           }
         }
-      } catch (e) {
-        console.error(`Failed to fetch answer for user ${id}`)
-        throw e
+
+        if (answers.length > 0) {
+          const fileContent = answers.join('\n')
+          const basePath = path.resolve(__dirname, `../answers/${programId}/${assignment.id}_${assignment.title}`)
+          fs.mkdirSync(basePath, { recursive: true })
+          fs.writeFileSync(path.resolve(basePath, `${student.id}.md`), fileContent, { encoding: 'utf-8' })
+        }
       }
     }
   }
+
+  const reposJsonPath = path.resolve(__dirname, `./repos.json`)
+  const reposJson = fs.readFileSync(reposJsonPath, { encoding: 'utf-8' })
+  const repos = JSON.parse(reposJson)
+
+  for (const [studentId, repoUrl] of availableRepos) {
+    if (!repos[studentId]) {
+      repos[studentId] = [] as string[]
+    }
+    const urls: string[] = repos[studentId]
+    if (!urls.includes(repoUrl) && !REPO_BLACKLIST.includes(repoUrl)) {
+      urls.push(repoUrl)
+    }
+  }
   
+  const updatedReposJson = JSON.stringify(repos, undefined, 2)
+  fs.writeFileSync(reposJsonPath, updatedReposJson, { encoding: 'utf-8' })
 }
 
 main()

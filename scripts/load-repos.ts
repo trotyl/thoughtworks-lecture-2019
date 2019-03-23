@@ -10,7 +10,7 @@ for (const [id, urls] of Object.entries(users)) {
     if (!fs.existsSync(path.resolve(__dirname, '../repos', folder, repo))) {
       try {
         console.log(`Loading repo ${url}`)
-        shell.exec(`git submodule add ${url} "${folder}/${repo}"`)
+        shell.exec(`git submodule add ${url} "repos/${folder}/${repo}"`)
       } catch {
         console.error(`Error loading ${url}`)
       }
