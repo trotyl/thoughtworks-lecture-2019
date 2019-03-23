@@ -10,6 +10,7 @@ const headers = {
 const quizzes = [
   ['01-markdown', 1679, 357] as [string, number, number],
   ['02-html', 1678, 366] as [string, number, number],
+  ['02-css', 1687, 374] as [string, number, number],
 ]
 
 async function main() {
