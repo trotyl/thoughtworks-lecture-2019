@@ -8,12 +8,13 @@ const headers = {
 }
 
 const quizzes: [string, number, number][] = [
-  // ['01-markdown', 1679, 357],
-  // ['02-html', 1678, 366],
-  // ['02-css', 1687, 374],
-  // ['02-html-css', 1686, 373],
-  // ['03-tdd', 1758, 5],
+  ['01-markdown', 1679, 357],
+  ['02-html', 1678, 366],
+  ['02-css', 1687, 374],
+  ['02-html-css', 1686, 373],
+  ['03-tdd', 1758, 5],
   ['04-tasking', 1753, 3],
+  ['04-pos', 1754, 4],
 ]
 
 const REPO_BLACKLIST = [
