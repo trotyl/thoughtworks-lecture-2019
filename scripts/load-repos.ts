@@ -7,11 +7,10 @@ for (const [id, urls] of Object.entries(users)) {
   for (const url of urls) {
     const [username, repo] = url.replace('https://github.com/', '').split('/')
     const folder = `${id}_${username}`
-    let target: string
-    if (!fs.existsSync(target = path.resolve(__dirname, '../repos', folder, repo))) {
+    if (!fs.existsSync(path.resolve(__dirname, '../repos', folder, repo))) {
       try {
         console.log(`Loading repo ${url}`)
-        shell.exec(`git submodule add ${url} "${target}"`)
+        shell.exec(`git submodule add ${url} "${folder}/${repo}"`)
       } catch {
         console.error(`Error loading ${url}`)
       }

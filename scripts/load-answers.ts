@@ -21,6 +21,7 @@ const REPO_BLACKLIST = [
   'https://github.com/BlueSkylover/html_homework',
   'https://github.com/carefreeMa/Markdown-Git',
   'https://github.com/Evidence999/Markdown',
+  'https://github.com/Evidence999/take-out-food-2018-11-26-7-35-16-442',
   'https://github.com/mahuanfy/CulturalCourse',
   'https://github.com/niniaibu/Training_Camp',
   'https://github.com/Snailclimb/JavaGuide',
