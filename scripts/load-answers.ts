@@ -103,13 +103,12 @@ async function main() {
       for (const assignment of assignments) {
         const answers: string[] = []
         for (const quiz of assignment.selectedQuizzes) {
-          const answer: Answer = await fetch(`${BASE_URL}/v2/students/${student.id}/assignments/${assignment.id}/quizzes/${quiz.quizId}`, { headers }).then(res => res.json())
+          const answerUrl = `${BASE_URL}/v2/students/${student.id}/assignments/${assignment.id}/quizzes/${quiz.quizId}`
+          console.log(`Fetching ${answerUrl}`)
+          const answer: Answer = await fetch(answerUrl, { headers }).then(res => res.json())
           let res: RegExpExecArray | null = null
           if (answer.choices) {
-            answers.push(`${answer.description}
-回答：${answer.userAnswer ? answer.choices[parseInt(answer.userAnswer!, 10)].choice : '尚未回答'}
-正确答案：${answer.choices[parseInt(answer.answer!, 10)].choice}
-`)
+            continue
           } else if (answer.answerBranch != null && (res = /https:\/\/github.com\/.*?\/[\w\-]+/.exec(answer.userAnswer))) {
             const [repoUrl] = res
             availableRepos.push([student.id, repoUrl])
@@ -118,7 +117,6 @@ async function main() {
           } else if (answer.userAnswer) {
             answers.push(answer.userAnswer)
 
-            let res: RegExpExecArray | null = null
             if (res = /https:\/\/github.com\/.*?\/[\w\-]+/.exec(answer.userAnswer)) {
               const [repoUrl] = res
               availableRepos.push([student.id, repoUrl])
